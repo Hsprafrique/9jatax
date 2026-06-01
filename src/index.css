@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; }
+  body {
+    @apply bg-navy-950 text-white font-sans antialiased;
+    min-height: 100dvh;
+  }
+  #root { min-height: 100dvh; }
+}
+
+@layer components {
+  .glass {
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .glass-card {
+    background: rgba(15, 37, 88, 0.6);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .navy-card {
+    @apply bg-navy-800 border border-navy-700 rounded-2xl;
+  }
+  .stat-card {
+    background: linear-gradient(135deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.03) 100%);
+    border: 1px solid rgba(255,255,255,0.1);
+    @apply rounded-2xl;
+  }
+  .btn-primary {
+    @apply bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-xl px-5 py-3 transition-all duration-200 active:scale-95;
+  }
+  .btn-secondary {
+    @apply border border-white/20 text-white hover:bg-white/10 font-medium rounded-xl px-5 py-3 transition-all duration-200;
+  }
+  .input-dark {
+    @apply w-full bg-navy-900 border border-navy-600 text-white placeholder-navy-400 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent;
+  }
+  .label-dark {
+    @apply block text-sm font-medium text-navy-200 mb-1.5;
+  }
+}
+
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.1) transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar { width: 4px; }
+  .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+  .text-gradient {
+    background: linear-gradient(135deg, #ffffff 0%, #34d399 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .glow-green {
+    box-shadow: 0 0 30px rgba(52, 211, 153, 0.2);
+  }
+  .glow-green-sm {
+    box-shadow: 0 0 15px rgba(52, 211, 153, 0.15);
+  }
+}
