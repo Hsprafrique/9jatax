@@ -15,47 +15,51 @@ import Debts from '@/pages/Debts'
 import Branches from '@/pages/Branches'
 import Settings from '@/pages/Settings'
 
-function ProtectedRoute({ children }) {
-  const { user, loading, needsOnboarding } = useAuth()
-
-  if (loading) return (
+function Loader() {
+  return (
     <div className="min-h-screen flex items-center justify-center bg-navy-950">
       <div className="flex flex-col items-center gap-4">
         <img src="/logo.png" alt="9jaTax" className="h-12 w-auto animate-pulse" />
-        <p className="text-navy-400 text-sm">Loading your dashboard...</p>
+        <p className="text-navy-400 text-sm">Loading...</p>
       </div>
     </div>
   )
+}
 
+// Redirects logged-in users away from /auth
+function AuthRoute() {
+  const { user, loading, needsOnboarding } = useAuth()
+  if (loading) return <Loader />
+  if (user && needsOnboarding) return <Navigate to="/onboarding" replace />
+  if (user && !needsOnboarding) return <Navigate to="/app" replace />
+  return <AuthPage />
+}
+
+// Forces onboarding before app access
+function OnboardingRoute() {
+  const { user, loading, needsOnboarding } = useAuth()
+  if (loading) return <Loader />
+  if (!user) return <Navigate to="/auth" replace />
+  if (!needsOnboarding) return <Navigate to="/app" replace />
+  return <Onboarding />
+}
+
+// Protects all /app/* routes
+function ProtectedLayout() {
+  const { user, loading, needsOnboarding } = useAuth()
+  if (loading) return <Loader />
   if (!user) return <Navigate to="/auth" replace />
   if (needsOnboarding) return <Navigate to="/onboarding" replace />
-  return children
+  return <Layout />
 }
 
 function AppRoutes() {
-  const { user, loading, needsOnboarding } = useAuth()
-
-  if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-navy-950">
-      <img src="/logo.png" alt="9jaTax" className="h-12 w-auto animate-pulse" />
-    </div>
-  )
-
   return (
     <Routes>
-      {/* Public */}
       <Route path="/" element={<LandingPage />} />
-      <Route path="/auth" element={user && !needsOnboarding ? <Navigate to="/app" replace /> : user && needsOnboarding ? <Navigate to="/onboarding" replace /> : <AuthPage />} />
-
-      {/* Onboarding — only for logged in users who haven't completed it */}
-      <Route path="/onboarding" element={
-        !user ? <Navigate to="/auth" replace /> :
-        !needsOnboarding ? <Navigate to="/app" replace /> :
-        <Onboarding />
-      } />
-
-      {/* App — protected */}
-      <Route path="/app" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+      <Route path="/auth" element={<AuthRoute />} />
+      <Route path="/onboarding" element={<OnboardingRoute />} />
+      <Route path="/app" element={<ProtectedLayout />}>
         <Route index element={<Dashboard />} />
         <Route path="expenses" element={<Expenses />} />
         <Route path="invoices" element={<Invoices />} />
@@ -66,7 +70,6 @@ function AppRoutes() {
         <Route path="branches" element={<Branches />} />
         <Route path="settings" element={<Settings />} />
       </Route>
-
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )

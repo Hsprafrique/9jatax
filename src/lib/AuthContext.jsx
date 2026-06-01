@@ -26,26 +26,26 @@ export function AuthProvider({ children }) {
 
   async function fetchProfile(userId) {
     try {
-      // Try to get existing profile
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single()
 
-      if (error && error.code === 'PGRST116') {
-        // Profile doesn't exist yet — create it
+      if (error || !data) {
+        // Profile missing — create it fresh with onboarding_done = false
         const { data: newProfile } = await supabase
           .from('profiles')
-          .insert({ id: userId })
+          .upsert({ id: userId, onboarding_done: false })
           .select()
           .single()
-        setProfile(newProfile)
+        setProfile(newProfile || { id: userId, onboarding_done: false })
       } else {
         setProfile(data)
       }
     } catch (e) {
-      console.error('Profile fetch error:', e)
+      // Fallback — treat as needing onboarding
+      setProfile({ id: userId, onboarding_done: false })
     }
     setLoading(false)
   }
@@ -54,7 +54,7 @@ export function AuthProvider({ children }) {
     try {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
       return { error }
-    } catch (err) {
+    } catch {
       return { error: { message: 'Connection error. Check your internet.' } }
     }
   }
@@ -67,7 +67,7 @@ export function AuthProvider({ children }) {
         options: { emailRedirectTo: `${window.location.origin}/auth` }
       })
       return { data, error }
-    } catch (err) {
+    } catch {
       return { error: { message: 'Connection error. Check your internet.' } }
     }
   }
@@ -85,12 +85,13 @@ export function AuthProvider({ children }) {
         .single()
       if (!error) setProfile(data)
       return { error }
-    } catch (err) {
+    } catch {
       return { error: { message: 'Failed to save. Try again.' } }
     }
   }
 
-  const needsOnboarding = user && profile && !profile.onboarding_done
+  // True only when user is logged in AND profile is loaded AND onboarding not done
+  const needsOnboarding = !loading && !!user && !!profile && !profile.onboarding_done
 
   return (
     <AuthContext.Provider value={{
