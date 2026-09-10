@@ -1,0 +1,2 @@
+-- Run the schema file previously provided, or the fix_auth_and_onboarding.sql
+-- if your database already has tables. See previous messages for full SQL.
